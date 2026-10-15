@@ -8,6 +8,7 @@ import { spendingOverTime } from "./spending-over-time.js";
 import { searchPayees } from "./search-payees.js";
 import { listPortfolio } from "./list-portfolio.js";
 import { rawQuery } from "./raw-query.js";
+import { setTransactionCategory } from "./set-transaction-category.js";
 
 /** Parameter type representation for help display and dynamic CLI parsing. */
 export type ParamType = "string" | "number" | "boolean" | "enum" | "array";
@@ -25,6 +26,7 @@ export interface ToolDef {
   description: string;
   parameters: Record<string, ToolParamDef>;
   handler: (db: Database.Database, args: any) => any;
+  writes?: boolean;
 }
 
 export const toolsRegistry: ToolDef[] = [
@@ -247,5 +249,26 @@ export const toolsRegistry: ToolDef[] = [
       },
     },
     handler: rawQuery,
+  },
+  {
+    name: "set_transaction_category",
+    description:
+      "Change the category of one split entry (entry_id from query_transactions). Writes to the Quicken database, so it is disabled unless QUICKEN_ALLOW_WRITES=1. Back up the .quicken bundle first.",
+    parameters: {
+      entry_id: {
+        type: "number",
+        description: "Split entry ID (entry_id column from query_transactions)",
+        optional: false,
+        zod: z.number().int().describe("Split entry ID"),
+      },
+      category_id: {
+        type: "number",
+        description: "Target category ID (id column from list_categories)",
+        optional: false,
+        zod: z.number().int().describe("Target category ID"),
+      },
+    },
+    handler: setTransactionCategory,
+    writes: true,
   },
 ];

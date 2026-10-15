@@ -87,6 +87,7 @@ export function queryTransactions(db: Database.Database, args: QueryTransactions
   const sql = `
     SELECT
       t.Z_PK as transaction_id,
+      s.Z_PK as entry_id,
       a.ZNAME as account_name,
       a.ZTYPENAME as account_type,
       p.ZNAME as payee,

@@ -124,6 +124,7 @@ export function createServer(getDb: () => Database.Database): McpServer {
         "- For spending analysis, prefer spending_by_category or spending_over_time over raw queries — they handle the category joins and date bucketing correctly.",
         "- Use search_payees to find the exact payee name before filtering transactions (payee names in Quicken are often different from what users expect).",
         "- Use list_portfolio for investment holdings (uses stored Quicken quotes for prices).",
+        "- set_transaction_category exists only when QUICKEN_ALLOW_WRITES=1. It writes to the user's Quicken data: confirm the entry_id and category_id with the user before each call.",
         "- Use raw_query only when the other tools can't answer the question. The database uses Core Data schema — tables are prefixed with Z and columns with Z.",
         "",
         "## Important conventions",
@@ -148,6 +149,7 @@ export function createServer(getDb: () => Database.Database): McpServer {
   );
 
   for (const tool of toolsRegistry) {
+    if (tool.writes && process.env.QUICKEN_ALLOW_WRITES !== "1") continue;
     const zodParams: Record<string, z.ZodType<any>> = {};
     for (const [pName, pDef] of Object.entries(tool.parameters)) {
       zodParams[pName] = pDef.zod;

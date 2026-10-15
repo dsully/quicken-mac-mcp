@@ -233,6 +233,10 @@ function printManPage() {
     "              Set this environment variable to specify the absolute path to your"
   );
   console.log("              Quicken SQLite file. Avoids needing the --db argument.");
+  console.log(`       ${c.bold("QUICKEN_ALLOW_WRITES")}`);
+  console.log(
+    "              Set to 1 to enable set-transaction-category, the only command that writes."
+  );
   console.log();
 
   console.log(c.bold("EXAMPLES"));

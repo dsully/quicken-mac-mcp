@@ -67,6 +67,10 @@
     {
       "name": "raw_query",
       "description": "Execute an arbitrary read-only SQL query against the Quicken database. Only SELECT statements are allowed. Results limited to 500 rows. Use this for custom analysis not covered by other tools."
+    },
+    {
+      "name": "set_transaction_category",
+      "description": "Change the category of one split entry (entry_id from query_transactions). Writes to the Quicken database, so it is disabled unless QUICKEN_ALLOW_WRITES=1. Back up the .quicken bundle first."
     }
   ],
   "compatibility": {

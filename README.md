@@ -8,7 +8,7 @@
 
 A **Claude Skill + MCP server** that gives Claude read-only access to your [Quicken For Mac](https://www.quicken.com/mac) financial data. Ask Claude about your accounts, transactions, spending by category, monthly trends, investment holdings, and more.
 
-The database is **always opened read-only** — your Quicken data is never modified.
+The database is **opened read-only by default** — your Quicken data is never modified unless you opt in to [category changes](#changing-categories-opt-in-writes).
 
 ## Skill or MCP — which do I want?
 
@@ -105,6 +105,13 @@ These are the eight prepackaged tools the MCP server exposes. The skill covers t
 | `search_payees` | Search payees by name with transaction counts. |
 | `list_portfolio` | List investment holdings with shares, cost basis, and stored Quicken price quotes. |
 | `raw_query` | Run arbitrary SELECT queries (500-row limit). |
+| `set_transaction_category` | Change the category of one split entry. Hidden unless `QUICKEN_ALLOW_WRITES=1`. |
+
+### Changing categories (opt-in writes)
+
+`set_transaction_category` is the only tool that writes. The MCP server does not expose it and the CLI refuses it unless `QUICKEN_ALLOW_WRITES=1` is set. It takes an `entry_id` (from `query_transactions`) and a `category_id` (from `list_categories`), and changes only that split entry. Transfer splits are rejected.
+
+Make a file-level backup of your `.quicken` bundle before you enable it. Quicken holds the database open while it runs; see [`docs/schema.md`](docs/schema.md#writing-back-to-the-database-forks--one-off-scripts) for the Core Data caveats.
 
 ## Self-Documenting Command-Line Interface (`qmac`)
 
