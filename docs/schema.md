@@ -18,10 +18,12 @@ Quicken for Mac stores its data in a [Core Data](https://developer.apple.com/doc
 
 ### Writing back to the database (forks / one-off scripts)
 
-This MCP server opens the database read-only. Its one exception is `set_transaction_category`, which is disabled unless `QUICKEN_ALLOW_WRITES=1` and follows rule 1 below. If you fork the schema knowledge here for an enrichment workflow that *does* write (e.g., the [Quicken ↔ Amazon order matcher gist](https://gist.github.com/Als-Pal/3fc9c18949c826c207559939e8d9b90a) that inspired the `split_note` column), Core Data has two non-obvious requirements:
+This MCP server opens the database read-only. Its exceptions are `set_transaction_category` and `split_transaction`, which are disabled unless `QUICKEN_ALLOW_WRITES=1` and follow rules 1 and 3 below. If you fork the schema knowledge here for an enrichment workflow that *does* write (e.g., the [Quicken ↔ Amazon order matcher gist](https://gist.github.com/Als-Pal/3fc9c18949c826c207559939e8d9b90a) that inspired the `split_note` column), Core Data has two non-obvious requirements:
 
 1. **Increment `Z_OPT` on every UPDATE.** It is the optimistic-locking counter Core Data uses to detect concurrent edits. Updates that don't bump `Z_OPT` may be silently rolled back or cause Quicken to corrupt the row on next sync. Always write `SET ZNOTE = ?, Z_OPT = Z_OPT + 1`.
 2. **Quicken must be closed before writing.** The same encryption that requires Quicken to be open for *reads* means concurrent writes from your script while Quicken is running will fight Core Data's in-memory state. Quit Quicken, run your update, then reopen — Quicken will pick up the changed rows.
+
+3. **Inserts allocate two IDs.** `Z_PK` comes from `Z_PRIMARYKEY.Z_MAX` for the entity, and `ZQUICKENID` comes from the `ZDOCUMENTPROPERTY` row named `<Entity>Id` (e.g. `CashFlowTransactionEntryId`). Advance both. They are separate counters; `ZQUICKENID` is not equal to `Z_PK`. A split entry also needs `Z<n>_PARENT` set to the parent transaction's `Z_ENT`, where `<n>` varies per file. Quicken may cache these counters while it runs, so verify on a copy first.
 
 Always make a file-level backup of the `.quicken/data` file before writing.
 

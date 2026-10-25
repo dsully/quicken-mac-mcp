@@ -9,6 +9,7 @@ import { searchPayees } from "./search-payees.js";
 import { listPortfolio } from "./list-portfolio.js";
 import { rawQuery } from "./raw-query.js";
 import { setTransactionCategory } from "./set-transaction-category.js";
+import { splitTransaction } from "./split-transaction.js";
 
 /** Parameter type representation for help display and dynamic CLI parsing. */
 export type ParamType = "string" | "number" | "boolean" | "enum" | "array";
@@ -269,6 +270,51 @@ export const toolsRegistry: ToolDef[] = [
       },
     },
     handler: setTransactionCategory,
+    writes: true,
+  },
+  {
+    name: "split_transaction",
+    description:
+      "Turn a transaction with exactly one entry into a split. The existing entry becomes split 1 and the others are inserted. Entry amounts must sum to the transaction amount. Quicken has one payee per transaction, so a per-entry vendor is written into that entry's memo. Writes to the Quicken database, so it is disabled unless QUICKEN_ALLOW_WRITES=1. Back up the .quicken bundle first.",
+    parameters: {
+      transaction_id: {
+        type: "number",
+        description: "Transaction ID (transaction_id column from query_transactions)",
+        optional: false,
+        zod: z.number().int().describe("Transaction ID"),
+      },
+      entries: {
+        type: "array",
+        description:
+          'Split entries, at least 2. Each: {"amount": -12.5, "category_id": 11, "vendor"?: "...", "memo"?: "..."}',
+        optional: false,
+        zod: z.preprocess(
+          // The CLI passes each array item as a JSON string.
+          (v) =>
+            Array.isArray(v)
+              ? v.map((item) => {
+                  if (typeof item !== "string") return item;
+                  try {
+                    return JSON.parse(item);
+                  } catch {
+                    return item;
+                  }
+                })
+              : v,
+          z
+            .array(
+              z.object({
+                amount: z.number(),
+                category_id: z.number().int(),
+                vendor: z.string().optional(),
+                memo: z.string().optional(),
+              })
+            )
+            .min(2)
+        ),
+      },
+    },
+    handler: splitTransaction,
     writes: true,
   },
 ];

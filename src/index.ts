@@ -235,7 +235,7 @@ function printManPage() {
   console.log("              Quicken SQLite file. Avoids needing the --db argument.");
   console.log(`       ${c.bold("QUICKEN_ALLOW_WRITES")}`);
   console.log(
-    "              Set to 1 to enable set-transaction-category, the only command that writes."
+    "              Set to 1 to enable set-transaction-category and split-transaction, the commands that write."
   );
   console.log();
 

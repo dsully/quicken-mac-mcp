@@ -106,10 +106,14 @@ These are the eight prepackaged tools the MCP server exposes. The skill covers t
 | `list_portfolio` | List investment holdings with shares, cost basis, and stored Quicken price quotes. |
 | `raw_query` | Run arbitrary SELECT queries (500-row limit). |
 | `set_transaction_category` | Change the category of one split entry. Hidden unless `QUICKEN_ALLOW_WRITES=1`. |
+| `split_transaction` | Turn a single-entry transaction into a split with per-entry amount, category, and memo. Hidden unless `QUICKEN_ALLOW_WRITES=1`. |
 
 ### Changing categories (opt-in writes)
 
-`set_transaction_category` is the only tool that writes. The MCP server does not expose it and the CLI refuses it unless `QUICKEN_ALLOW_WRITES=1` is set. It takes an `entry_id` (from `query_transactions`) and a `category_id` (from `list_categories`), and changes only that split entry. Transfer splits are rejected.
+`set_transaction_category` and `split_transaction` are the only tools that write. The MCP server does not expose them and the CLI refuses them unless `QUICKEN_ALLOW_WRITES=1` is set. Transfers are rejected by both.
+
+- `set_transaction_category` takes an `entry_id` (from `query_transactions`) and a `category_id` (from `list_categories`), and changes only that split entry.
+- `split_transaction` takes a `transaction_id` with exactly one entry and a list of at least 2 entries (`amount`, `category_id`, optional `vendor` and `memo`). The amounts must sum to the transaction amount. Quicken stores one payee per transaction, so `vendor` is written into the entry memo as `vendor: memo`. New entries get IDs from Quicken's `Z_PRIMARYKEY` and `ZDOCUMENTPROPERTY` counters; verify on a copy of your bundle first.
 
 Make a file-level backup of your `.quicken` bundle before you enable it. Quicken holds the database open while it runs; see [`docs/schema.md`](docs/schema.md#writing-back-to-the-database-forks--one-off-scripts) for the Core Data caveats.
 

@@ -125,6 +125,7 @@ export function createServer(getDb: () => Database.Database): McpServer {
         "- Use search_payees to find the exact payee name before filtering transactions (payee names in Quicken are often different from what users expect).",
         "- Use list_portfolio for investment holdings (uses stored Quicken quotes for prices).",
         "- set_transaction_category exists only when QUICKEN_ALLOW_WRITES=1. It writes to the user's Quicken data: confirm the entry_id and category_id with the user before each call.",
+        "- split_transaction exists only when QUICKEN_ALLOW_WRITES=1. It writes to the user's Quicken data: show the user every entry (amount, category, vendor, memo) and get confirmation before each call.",
         "- Use raw_query only when the other tools can't answer the question. The database uses Core Data schema — tables are prefixed with Z and columns with Z.",
         "",
         "## Important conventions",

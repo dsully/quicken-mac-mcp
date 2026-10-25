@@ -231,6 +231,31 @@ export function inclusiveEndDateToCoreDataExclusive(iso: string): number {
   return isoToCoreData(iso) + 86400;
 }
 
+export function nowCoreData(): number {
+  return Date.now() / 1000 - CORE_DATA_EPOCH_OFFSET;
+}
+
+/**
+ * Run `fn` in one transaction on a short-lived read-write connection to the
+ * same file as `db`, so the shared connection stays read-only.
+ */
+export function withQuickenWrite<T>(
+  db: Database.Database,
+  fn: (rw: Database.Database) => T
+): T {
+  if (process.env.QUICKEN_ALLOW_WRITES !== "1") {
+    throw new Error(
+      "Writes are disabled. Set QUICKEN_ALLOW_WRITES=1 to enable write tools."
+    );
+  }
+  const rw = new Database(db.name, { fileMustExist: true });
+  try {
+    return rw.transaction(() => fn(rw))();
+  } finally {
+    rw.close();
+  }
+}
+
 /**
  * Convert a Core Data timestamp to an ISO 8601 date string (YYYY-MM-DD).
  */

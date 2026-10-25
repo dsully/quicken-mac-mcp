@@ -71,6 +71,10 @@
     {
       "name": "set_transaction_category",
       "description": "Change the category of one split entry (entry_id from query_transactions). Writes to the Quicken database, so it is disabled unless QUICKEN_ALLOW_WRITES=1. Back up the .quicken bundle first."
+    },
+    {
+      "name": "split_transaction",
+      "description": "Turn a transaction with exactly one entry into a split. The existing entry becomes split 1 and the others are inserted. Entry amounts must sum to the transaction amount. Quicken has one payee per transaction, so a per-entry vendor is written into that entry's memo. Writes to the Quicken database, so it is disabled unless QUICKEN_ALLOW_WRITES=1. Back up the .quicken bundle first."
     }
   ],
   "compatibility": {

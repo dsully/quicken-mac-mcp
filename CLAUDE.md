@@ -16,7 +16,7 @@ Development reference for `quicken-mac-mcp`.
 
 - **Style**: Use standard TypeScript with Prettier configuration (semicolons, single quotes, double spaces).
 - **Environment**: ESM modules are used throughout (`"type": "module"` in `package.json`). All relative imports must end with `.js` extensions (e.g. `import { x } from './db.js'`).
-- **Database Safety**: All Quicken database access must be read-only (`{ readonly: true }`). Never perform write queries on the decrypted SQLite database. The one exception is `set_transaction_category`, gated by `QUICKEN_ALLOW_WRITES=1`, which uses its own short-lived read-write connection and bumps `Z_OPT`.
+- **Database Safety**: All Quicken database access must be read-only (`{ readonly: true }`). Never perform write queries on the decrypted SQLite database. The exceptions are `set_transaction_category` and `split_transaction`, gated by `QUICKEN_ALLOW_WRITES=1`. They go through `withQuickenWrite` (its own short-lived read-write connection), bump `Z_OPT`, and inserts also advance both ID counters (see `docs/schema.md`).
 - **Error Handling**: Use `sanitizeError` or safe wrappers to avoid leaking absolute paths of personal data files in logs or tool responses.
 - **Naming Conventions**:
   - MCP Tool subcommands in CLI: accept snake_case, kebab-case, or camelCase, but internal properties map to standard tool arguments.
